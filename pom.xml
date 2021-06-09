@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.5.0</version>
+		<version>2.1.2.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.oyo</groupId>
@@ -138,11 +138,6 @@
 			<version>3.0.0</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/javax.validation/validation-api -->
-		<dependency>
-			<groupId>org.liquibase</groupId>
-			<artifactId>liquibase-core</artifactId>
-			<version>3.6.2</version>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -623,58 +618,6 @@
 								<source>src/it/java</source>
 							</sources>
 						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>io.fabric8</groupId>
-				<artifactId>docker-maven-plugin</artifactId>
-				<version>${version.docker-maven-plugin}</version>
-				<configuration>
-					<verbose>true</verbose>
-					<registry>${docker.registry}</registry>
-					<dockerFileDir>src/main/docker</dockerFileDir>
-					<images>
-						<image>
-							<name>${docker.base}/payment-service</name>
-							<build>
-								<dockerFileDir>${project.basedir}/src/main/docker</dockerFileDir>
-								<tags>
-									<tag>${project.version}</tag>
-									<tag>latest</tag>
-								</tags>
-
-								<assembly>
-									<!-- <descriptorRef>artifact</descriptorRef> -->
-									<inline>
-										<dependencySets>
-											<dependencySet>
-												<includes>
-													<include>${project.groupId}:${project.artifactId}</include>
-												</includes>
-												<outputFileNameMapping>app.jar</outputFileNameMapping>
-											</dependencySet>
-										</dependencySets>
-									</inline>
-								</assembly>
-							</build>
-						</image>
-					</images>
-				</configuration>
-				<executions>
-					<execution>
-						<id>build-docker-image</id>
-						<phase>package</phase>
-						<goals>
-							<goal>build</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>push-docker-image</id>
-						<phase>deploy</phase>
-						<goals>
-							<goal>push</goal>
-						</goals>
 					</execution>
 				</executions>
 			</plugin>
