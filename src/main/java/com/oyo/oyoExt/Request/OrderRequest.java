@@ -18,9 +18,9 @@ import java.util.List;
 @Builder
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CreateOrderRequest {
+public class OrderRequest {
 
-    private List<Order> order;
+    private List<Products> order;
     private String bookingId;
     private String userProfileId;
 

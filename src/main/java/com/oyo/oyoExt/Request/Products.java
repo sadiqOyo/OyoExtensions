@@ -14,7 +14,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Products implements Serializable {
+public class Products {
     private String description;
     private String name;
     private Long price;

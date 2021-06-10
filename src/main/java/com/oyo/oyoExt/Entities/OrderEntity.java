@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.google.gson.JsonObject;
 import com.oyo.oyoExt.Request.Products;
+import com.oyo.paymentgatewayscommon.utilities.JSONBUserType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,6 +22,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @Getter
@@ -30,6 +32,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@org.hibernate.annotations.TypeDef(name = "JSONBUserType", typeClass = JSONBUserType.class)
 public class OrderEntity {
 
     private final static String DATE_PATTERN = "yyyy-MM-dd HH:mm:ss Z";
@@ -48,7 +51,11 @@ public class OrderEntity {
 
     private Boolean is_paid;
 
-    private Products products;
+    @Type(type = "JSONBUserType")
+    @Column(nullable = true)
+    private List<Products> products;
+
+    private String Category;
 
     @Column(nullable = false)
     private Date createdAt;

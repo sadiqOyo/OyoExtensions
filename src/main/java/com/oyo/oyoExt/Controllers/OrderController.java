@@ -1,6 +1,6 @@
 package com.oyo.oyoExt.Controllers;
 
-import com.oyo.oyoExt.Request.CreateOrderRequest;
+import com.oyo.oyoExt.Request.OrderRequest;
 import com.oyo.payments.response.WrapperResponse;
 import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +18,7 @@ public class OrderController {
 
     @PostMapping("/create")
     public WrapperResponse<?> createOrder(
-            @RequestBody CreateOrderRequest createOrderRequest) {
+            @RequestBody OrderRequest orderRequest) {
 
         return null;
     }
