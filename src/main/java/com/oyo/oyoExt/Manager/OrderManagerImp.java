@@ -39,6 +39,7 @@ public class OrderManagerImp implements OrderManager{
         orderEntity.setCategory(orderRequest.getCategory());
         orderEntity.setCreatedAt(Date.from(Instant.now()));
         orderEntity.setUpdatedAt(Date.from(Instant.now()));
+        orderEntity.setUserProfileId(orderRequest.getUserProfileId());
         orderRepositry.save(orderEntity);
         return WrapperResponse.<Boolean>builder().data(Boolean.TRUE).build();
     }

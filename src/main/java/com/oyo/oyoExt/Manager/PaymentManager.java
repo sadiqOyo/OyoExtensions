@@ -1,15 +1,11 @@
 package com.oyo.oyoExt.Manager;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.gson.Gson;
 import com.oyo.oyoExt.Entities.OrderEntity;
 import com.oyo.oyoExt.Request.InitiatePaymentReq;
-import com.oyo.oyoExt.Request.Order;
 import com.oyo.oyoExt.Request.OrderIdsRequest;
-import com.oyo.oyoExt.Request.Products;
-import com.oyo.oyoExt.Response.ChargedResponse;
 import com.oyo.oyoExt.Response.InitiatePaymentRes;
 import com.oyo.oyoExt.Response.InvoiceResponse;
 import com.oyo.oyoExt.Response.PaymentDataResponse;
@@ -19,10 +15,6 @@ import com.oyo.paymentgatewayscommon.enums.Currency;
 import com.oyo.paymentgatewayscommon.enums.Gateway;
 import com.oyo.paymentgatewayscommon.enums.OrderType;
 import com.oyo.paymentgatewayscommon.enums.PaymentMode;
-import com.oyo.paymentgatewayscommon.enums.StatusCode;
-import com.oyo.paymentgatewayscommon.enums.TransactionStatus;
-import com.oyo.paymentgatewayscommon.request.AmountRequest;
-import com.oyo.paymentgatewayscommon.request.InitiatePaymentRequest;
 import com.oyo.paymentgatewayscommon.response.InitiatePaymentResponse;
 import com.oyo.payments.response.WrapperResponse;
 import org.json.JSONObject;
@@ -37,8 +29,6 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -112,9 +102,13 @@ public class PaymentManager {
         RestTemplate restTemplate = new RestTemplate();
         InitiatePaymentReq initiatePaymentRequest = getInitiatePaymentRequest(orderEntityList);
         if(Objects.isNull(initiatePaymentRequest)){
-            InvoiceResponse invoiceResponse = getInvoice(bookingId)
+            WrapperResponse<?> invoiceResponse = getInvoice(bookingId);
+
+            InvoiceResponse invres = (InvoiceResponse) invoiceResponse.getData();
+            //gson.fromJson(invoiceResponse.getData().toString(), InvoiceResponse.class);
+            invres.getOrders().stream().filter(o -> orderEntityList.contains(o.getOrderId()));
            return WrapperResponse.<InvoiceResponse>builder().statusMessage("Orders Already Charged").
-                    statusCode(String.valueOf(HttpStatus.ALREADY_REPORTED)).data(invoiceResponse).build();
+                    statusCode(String.valueOf(HttpStatus.ALREADY_REPORTED)).data(invres).build();
         }
         String requestString = gson.toJson(initiatePaymentRequest);
         JSONObject body = objectMapper.convertValue(requestString, JSONObject.class);
