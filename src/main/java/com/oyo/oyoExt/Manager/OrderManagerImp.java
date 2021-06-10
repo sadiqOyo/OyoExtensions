@@ -48,7 +48,6 @@ public class OrderManagerImp implements OrderManager{
 
     @Override
     public WrapperResponse<?> viewOrderByOrderId(String orderId)  {
-
         OrderEntity order = orderRepositry.findByOrderId(orderId);
         if(Objects.isNull(order))
             return WrapperResponse.<OrderEntity>builder().
@@ -84,6 +83,7 @@ public class OrderManagerImp implements OrderManager{
 
 
 
+
     @Override public WrapperResponse<?> payOrder(String orderId, String bookingId) {
 //        OrderEntity order = orderRepositry.findByOrderIdAndAndBookingId(orderId,bookingId);
 //        if(Objects.isNull(order))
@@ -92,4 +92,5 @@ public class OrderManagerImp implements OrderManager{
 //        orderRepositry.save(order);
         return WrapperResponse.<Boolean>builder().data(Boolean.TRUE).build();
     }
+
 }
