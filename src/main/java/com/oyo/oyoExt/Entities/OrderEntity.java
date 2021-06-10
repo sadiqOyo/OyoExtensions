@@ -36,9 +36,6 @@ import java.util.List;
 @org.hibernate.annotations.TypeDef(name = "JSONBUserType", typeClass = JSONBUserType.class)
 public class OrderEntity {
 
-    private final static String DATE_PATTERN = "yyyy-MM-dd HH:mm:ss Z";
-    @Transient
-    private final SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,17 +51,16 @@ public class OrderEntity {
 
     private Long totalAmount;
 
-    @Type(type = "JSONBUserType")
     @Column(nullable = true)
-    private JSONObject products;
+    private String products;
 
     private String Category;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Date createdAt;
 
     @UpdateTimestamp
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Date updatedAt;
 
 

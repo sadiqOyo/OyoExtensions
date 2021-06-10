@@ -18,10 +18,13 @@ import java.util.List;
 @Builder
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OrderRequest {
+public class OrderRequest{
 
     private List<Products> products;
     private String bookingId;
     private String userProfileId;
+    private Boolean isPaid;
+    private String category;
+
 
 }

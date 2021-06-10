@@ -1,18 +1,21 @@
 package com.oyo.oyoExt.Manager;
 
-import com.oyo.oyoExt.Entities.OrderEntity;
 import com.oyo.oyoExt.Request.Order;
+import com.oyo.oyoExt.Request.OrderRequest;
 import com.oyo.oyoExt.Request.Products;
+import com.oyo.payments.response.WrapperResponse;
 
 import java.util.List;
 
 public interface OrderManager {
 
-    public void addProduct(List<Products> productsList,String bookingId,Boolean isPaid);
+    public WrapperResponse<?> addOrder(OrderRequest orderRequest);
 
-    public OrderEntity viewOrder(String orderId,String bookingId) throws Exception;
+    public WrapperResponse<?> viewOrderByOrderId(String orderId) ;
 
-    public void modifyOrder(Order order) throws Exception;
+    public WrapperResponse<?> viewOrderByBookingId(String bookingId) ;
 
-    public boolean payOrder(String orderId,String bookingId) throws Exception;
+    public WrapperResponse<?> modifyOrder(OrderRequest order, String orderId) ;
+
+    public WrapperResponse<?> payOrder(String orderId,String bookingId);
 }
