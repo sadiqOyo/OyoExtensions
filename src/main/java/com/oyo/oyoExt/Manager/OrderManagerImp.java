@@ -27,13 +27,21 @@ public class OrderManagerImp implements OrderManager {
         orderRepositry.save(orderEntity);
     }
 
-    @Override public OrderEntity viewOrder(String orderId, String bookingId) throws Exception {
-        OrderEntity order = orderRepositry.findByOrderIdAndAndBookingId(orderId,bookingId);
+    @Override public OrderEntity viewOrder(String orderId) throws Exception {
+        OrderEntity order = orderRepositry.findByOrderId(orderId);
         if(Objects.isNull(order))
             throw new Exception("Order not found"+orderId);
 
         return order;
     }
+
+    @Override public List<Order> viewbooking(String bookingId) throws Exception {
+        List<Order> orders = orderRepositry.findByBookingId(bookingId);
+        if(orders.isEmpty())
+            throw new Exception("Booking not found"+bookingId);
+        return orders;
+    }
+
 
     @Override public void modifyOrder(Order order) throws Exception {
         OrderEntity existingOrder = orderRepositry.findByOrderIdAndAndBookingId(order.getOrderId(),
@@ -43,8 +51,8 @@ public class OrderManagerImp implements OrderManager {
         orderRepositry.save(existingOrder);
     }
 
-    @Override public boolean payOrder(String orderId, String bookingId) throws Exception {
-        OrderEntity order = orderRepositry.findByOrderIdAndAndBookingId(orderId,bookingId);
+    @Override public boolean payOrder(String orderId) throws Exception {
+        OrderEntity order = orderRepositry.findByOrderId(orderId);
         if(Objects.isNull(order))
             throw new Exception("Order not found"+orderId);
         order.setIsPaid(true);

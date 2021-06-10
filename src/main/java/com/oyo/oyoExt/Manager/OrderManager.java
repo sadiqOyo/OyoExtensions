@@ -10,9 +10,11 @@ public interface OrderManager {
 
     public void addProduct(List<Products> productsList,String bookingId,Boolean isPaid);
 
-    public OrderEntity viewOrder(String orderId,String bookingId) throws Exception;
+    public OrderEntity viewOrder(String orderId) throws Exception;
+
+    public List<Order> viewbooking(String bookingId) throws Exception;
 
     public void modifyOrder(Order order) throws Exception;
 
-    public boolean payOrder(String orderId,String bookingId) throws Exception;
+    public boolean payOrder(String orderId) throws Exception;
 }

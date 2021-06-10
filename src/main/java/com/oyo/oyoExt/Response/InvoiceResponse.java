@@ -1,13 +1,18 @@
 package com.oyo.oyoExt.Response;
 
 import com.oyo.oyoExt.Request.Order;
-import com.oyo.oyoExt.Request.Products;
+import lombok.*;
 
 import java.util.List;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class InvoiceResponse {
 
-    private String orderId;
+    private String bookingId;
     private Long totalAmount;
     private List<Order> orders;
     private Long remainingAmount;
