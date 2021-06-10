@@ -51,6 +51,8 @@ public class OrderEntity {
 
     private Boolean is_paid;
 
+    private Long totalAmount;
+
     @Type(type = "JSONBUserType")
     @Column(nullable = true)
     private List<Products> products;
