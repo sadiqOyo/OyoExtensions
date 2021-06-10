@@ -10,6 +10,7 @@ import com.oyo.oyoExt.Request.Products;
 import com.oyo.oyoExt.Response.InvoiceResponse;
 import com.oyo.oyoExt.repositry.OrderRepositry;
 import com.oyo.paymentgatewayscommon.enums.Aggregator;
+import com.oyo.paymentgatewayscommon.enums.Currency;
 import com.oyo.paymentgatewayscommon.enums.PaymentMode;
 import com.oyo.paymentgatewayscommon.enums.StatusCode;
 import com.oyo.paymentgatewayscommon.request.AmountRequest;
@@ -27,9 +28,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 public class PaymentManager {
@@ -89,12 +92,14 @@ public class PaymentManager {
             return WrapperResponse.<InitiatePaymentResponse>builder().statusMessage("No order found with given order id").
                     statusCode(String.valueOf(HttpStatus.BAD_REQUEST)).build();
         }
-        return initiatePayment(orderEntity);
+        List<OrderEntity> orderEntityList = new ArrayList<>();
+        orderEntityList.add(orderEntity);
+        return initiatePayment(orderEntityList);
 
 
     }
 
-    private WrapperResponse<?> initiatePayment(OrderEntity orderEntity) {
+    private WrapperResponse<?> initiatePayment(List<OrderEntity> orderEntity) {
         InitiatePaymentResponse initiatePaymentResponse = null;
         InitiatePaymentReq initiatePaymentRequest = getInitiatePaymentRequest(orderEntity);
         String requestString = gson.toJson(initiatePaymentRequest);
@@ -102,7 +107,7 @@ public class PaymentManager {
         HttpEntity<JSONObject> requestEntity = new HttpEntity<>(body, new HttpHeaders());
         ResponseEntity<String> paymentResponse = restTemplate.exchange(baseUrl+path, HttpMethod.POST,requestEntity,String.class);
         if(paymentResponse.getStatusCode().equals(HttpStatus.OK)){
-            orderManagerImp.modifyOrder(orderEntity.getOrderId(), Boolean.TRUE);
+            orderEntity.stream().forEach(orders -> orderManagerImp.modifyOrder(orders.getOrderId(), Boolean.TRUE));
             try {
                 initiatePaymentResponse = objectMapper.readValue(paymentResponse.getBody(), InitiatePaymentResponse.class);
             } catch (IOException e) {
@@ -115,32 +120,32 @@ public class PaymentManager {
                 statusCode(String.valueOf(HttpStatus.BAD_REQUEST)).build();
     }
 
-    private InitiatePaymentReq getInitiatePaymentRequest(OrderEntity orderEntity) {
-        InitiatePaymentReq initiatePaymentReq = InitiatePaymentReq.builder().amount(orderEntity.getTotalAmount()).
+    private InitiatePaymentReq getInitiatePaymentRequest(List<OrderEntity> orderEntity) {
+        OrderEntity order = orderEntity.get(0);
+        Currency currency = order.getCurrency();
+        String merchantTxnId = orderEntity.size()== 1?order.getOrderId():order.getBookingId();
+        String userProfileId = order.getUserProfileId();
+        Double totalAmount = orderEntity.stream().collect(Collectors.summingDouble(OrderEntity::getTotalAmount));
+
+        InitiatePaymentReq initiatePaymentReq = InitiatePaymentReq.builder().amount(totalAmount).
                 aggregator(Aggregator.DEFAULT).
                 channelId(UUID.fromString("211f2406-d211-4f6b-b8b3-4532248ee4b0")).
-                countryCode("IN").collectCards(Boolean.TRUE).currency(orderEntity.getCurrency()).
-                orderId(orderEntity.getOrderId()).merchantId(UUID.fromString("2738f2b4-a35d-4c33-a26a-e4d9583778a5")).
-                orderAmount(orderEntity.getTotalAmount()).paymentMode(PaymentMode.CC).
-                merchantTxnId(orderEntity.getOrderId()).userProfileId(orderEntity.getUserProfileId())
+                countryCode("IN").collectCards(Boolean.TRUE).currency(currency).
+                orderId(merchantTxnId).merchantId(UUID.fromString("2738f2b4-a35d-4c33-a26a-e4d9583778a5")).
+                orderAmount(totalAmount).paymentMode(PaymentMode.CC).
+                merchantTxnId(merchantTxnId).userProfileId(userProfileId)
                 .build();
         return initiatePaymentReq;
     }
 
-    public InitiatePaymentResponse fullPayment(String bookingId) throws IOException {
-       List<OrderEntity> orders= orderRepositry.findAllByBookingId(bookingId);
-       InitiatePaymentResponse response = null;
+    public WrapperResponse<?> fullPayment(String bookingId) throws IOException {
 
-       Double amount = null;
-        for (OrderEntity order:orders) {
-            if(!order.getIsPaid())
-            {
-                Products products = objectMapper.readValue(order.getProducts(), Products.class);
-                amount+=products.getAmount();
-            }
+        List<OrderEntity> orderEntityList = orderRepositry.findAllByBookingId(bookingId);
+        if(orderEntityList.size() == 0){
+            return WrapperResponse.<InitiatePaymentResponse>builder().statusMessage("No order found with given booking id").
+                    statusCode(String.valueOf(HttpStatus.BAD_REQUEST)).build();
         }
-//      call payment-service on amount  and booking id
-        return response;
+        return initiatePayment(orderEntityList);
     }
 
 }
