@@ -15,8 +15,7 @@ public interface OrderManager {
 
     public WrapperResponse<?> viewOrderByBookingId(String bookingId) ;
 
-    public WrapperResponse<?> modifyOrder(OrderRequest order, String orderId) ;
+    public WrapperResponse<?> modifyOrder(String orderId, Boolean isPaid) ;
 
-    public WrapperResponse<?> payOrder(String orderId,String bookingId);
 
 }

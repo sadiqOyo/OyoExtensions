@@ -6,16 +6,12 @@ import com.oyo.oyoExt.Request.OrderRequest;
 import com.oyo.oyoExt.Request.Products;
 import com.oyo.oyoExt.repositry.OrderRepositry;
 import com.oyo.paymentgatewayscommon.enums.StatusCode;
-import com.oyo.paymentgatewayscommon.parser.IGson;
-import com.oyo.paymentgatewayscommon.utilities.IUtil;
 import com.oyo.payments.response.WrapperResponse;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.Collections;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -37,8 +33,9 @@ public class OrderManagerImp implements OrderManager{
         orderEntity.setOrderId(String.valueOf(UUID.randomUUID()));
         orderEntity.setBookingId(orderRequest.getBookingId());
         orderEntity.setIsPaid(orderRequest.getIsPaid());
-        Long totalAmount = orderRequest.getProducts().stream().collect(Collectors.summingLong(Products::getPrice));
+        Double totalAmount = orderRequest.getProducts().stream().collect(Collectors.summingDouble(Products::getAmount));
         orderEntity.setTotalAmount(totalAmount);
+        orderEntity.setCurrency(orderRequest.getCurrency());
         orderEntity.setCategory(orderRequest.getCategory());
         orderEntity.setCreatedAt(Date.from(Instant.now()));
         orderEntity.setUpdatedAt(Date.from(Instant.now()));
@@ -70,27 +67,18 @@ public class OrderManagerImp implements OrderManager{
     }
 
     @Override
-    public WrapperResponse<?> modifyOrder(OrderRequest modifyOrderRequest, String orderId)  {
+    public WrapperResponse<?> modifyOrder(String orderId, Boolean isPaid)  {
 
         OrderEntity existingOrder = orderRepositry.findByOrderId(orderId);
         if(Objects.isNull(existingOrder))
             return WrapperResponse.<OrderEntity>builder().
                     statusCode(String.valueOf(StatusCode.BAD_REQUEST)).statusMessage("no data found").build();
-        existingOrder.setIsPaid(modifyOrderRequest.getIsPaid());
+        existingOrder.setIsPaid(isPaid);
         orderRepositry.save(existingOrder);
         return WrapperResponse.<OrderEntity>builder().data(existingOrder).build();
     }
 
 
 
-
-    @Override public WrapperResponse<?> payOrder(String orderId, String bookingId) {
-//        OrderEntity order = orderRepositry.findByOrderIdAndAndBookingId(orderId,bookingId);
-//        if(Objects.isNull(order))
-//            throw new Exception("Order not found"+orderId);
-//        order.setIsPaid(true);
-//        orderRepositry.save(order);
-        return WrapperResponse.<Boolean>builder().data(Boolean.TRUE).build();
-    }
 
 }

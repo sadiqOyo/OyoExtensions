@@ -1,6 +1,7 @@
 package com.oyo.oyoExt.Request;
 
 
+import com.oyo.paymentgatewayscommon.request.AmountRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.Currency;
 
 @Getter
 @Setter
@@ -17,5 +19,6 @@ import java.io.Serializable;
 public class Products implements  Serializable{
     private String description;
     private String name;
-    private Long price;
+    private Double amount;
+
 }

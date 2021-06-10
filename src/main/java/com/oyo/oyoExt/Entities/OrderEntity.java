@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.google.gson.JsonObject;
 import com.oyo.oyoExt.Request.Products;
+import com.oyo.paymentgatewayscommon.enums.Currency;
 import com.oyo.paymentgatewayscommon.utilities.JSONBUserType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -49,7 +50,10 @@ public class OrderEntity {
 
     private Boolean isPaid;
 
-    private Long totalAmount;
+    private Double totalAmount;
+
+
+    private Currency currency;
 
     @Column(nullable = true)
     private String products;

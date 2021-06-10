@@ -47,9 +47,9 @@ public class OrderController {
 
     @PatchMapping("/modify")
     public WrapperResponse<?> modifyOrder(@RequestParam(value = "order_id", required = true) String orderId,
-            @RequestBody OrderRequest modifyOrderRequest) {
+            @RequestParam(value = "is_paid", required = true) Boolean isPaid) {
 
-        return orderManagerImp.modifyOrder(modifyOrderRequest, orderId);
+        return orderManagerImp.modifyOrder(orderId, isPaid);
     }
 
 }

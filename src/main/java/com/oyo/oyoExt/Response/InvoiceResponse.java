@@ -1,5 +1,6 @@
 package com.oyo.oyoExt.Response;
 
+import com.oyo.oyoExt.Entities.OrderEntity;
 import com.oyo.oyoExt.Request.Order;
 import lombok.*;
 
@@ -13,7 +14,7 @@ import java.util.List;
 public class InvoiceResponse {
 
     private String bookingId;
-    private Long totalAmount;
-    private List<Order> orders;
-    private Long remainingAmount;
+    private Double totalAmount;
+    private List<OrderEntity> orders;
+    private Double remainingAmount;
 }
