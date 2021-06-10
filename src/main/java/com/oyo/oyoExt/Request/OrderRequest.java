@@ -20,7 +20,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OrderRequest {
 
-    private List<Products> order;
+    private List<Products> products;
     private String bookingId;
     private String userProfileId;
 

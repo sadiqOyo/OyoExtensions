@@ -1,6 +1,7 @@
 package com.oyo.oyoExt.Controllers;
 
-import com.oyo.oyoExt.Request.CreateOrderRequest;
+
+import com.oyo.oyoExt.Request.OrderRequest;
 import com.oyo.payments.response.WrapperResponse;
 import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +16,7 @@ public class PaymentController {
 
     @PostMapping("/partial")
     public WrapperResponse<?> partialPayment(
-            @RequestBody CreateOrderRequest createOrderRequest) {
+            @RequestBody OrderRequest createOrderRequest) {
 
         return null;
     }

@@ -10,7 +10,7 @@ public interface OrderManager {
 
     public void addProduct(List<Products> productsList,String bookingId,Boolean isPaid);
 
-    public Order viewOrder(String orderId,String bookingId) throws Exception;
+    public OrderEntity viewOrder(String orderId,String bookingId) throws Exception;
 
     public void modifyOrder(Order order) throws Exception;
 

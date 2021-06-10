@@ -3,8 +3,10 @@ package com.oyo.oyoExt.repositry;
 import com.oyo.oyoExt.Entities.OrderEntity;
 import com.oyo.oyoExt.Request.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface OrderRepositry extends JpaRepository<Order, Long> {
+@Repository
+public interface OrderRepositry extends JpaRepository<OrderEntity, Long> {
 
-    Order findByOrderIdAndAndBookingId(String orderId, String bookingId);
+    OrderEntity findByOrderIdAndAndBookingId(String orderId, String bookingId);
 }

@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.json.simple.JSONObject;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -43,19 +44,19 @@ public class OrderEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String booking_id;
+    private String bookingId;
 
-    private String order_id;
+    private String orderId;
 
-    private String user_profile_id;
+    private String userProfileId;
 
-    private Boolean is_paid;
+    private Boolean isPaid;
 
     private Long totalAmount;
 
     @Type(type = "JSONBUserType")
     @Column(nullable = true)
-    private List<Products> products;
+    private JSONObject products;
 
     private String Category;
 

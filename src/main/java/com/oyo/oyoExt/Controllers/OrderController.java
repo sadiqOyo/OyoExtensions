@@ -1,5 +1,6 @@
 package com.oyo.oyoExt.Controllers;
 
+import com.oyo.oyoExt.Request.ModifyOrderRequest;
 import com.oyo.oyoExt.Request.OrderRequest;
 import com.oyo.payments.response.WrapperResponse;
 import io.swagger.annotations.Api;
@@ -34,7 +35,8 @@ public class OrderController {
     @PatchMapping("/modify")
     public WrapperResponse<?> modifyOrder(
             @RequestParam(value = "booking_id", required = true) String bookingId,
-            @RequestParam(value = "order_id", required = true) String orderId) {
+            @RequestParam(value = "order_id", required = true) String orderId,
+            @RequestBody ModifyOrderRequest modifyOrderRequest) {
 
         return null;
     }
