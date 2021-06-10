@@ -2,17 +2,25 @@ package com.oyo.oyoExt.Manager;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.gson.Gson;
 import com.oyo.oyoExt.Entities.OrderEntity;
 import com.oyo.oyoExt.Request.InitiatePaymentReq;
 import com.oyo.oyoExt.Request.Order;
+import com.oyo.oyoExt.Request.OrderIdsRequest;
 import com.oyo.oyoExt.Request.Products;
+import com.oyo.oyoExt.Response.ChargedResponse;
+import com.oyo.oyoExt.Response.InitiatePaymentRes;
 import com.oyo.oyoExt.Response.InvoiceResponse;
+import com.oyo.oyoExt.Response.PaymentDataResponse;
 import com.oyo.oyoExt.repositry.OrderRepositry;
 import com.oyo.paymentgatewayscommon.enums.Aggregator;
 import com.oyo.paymentgatewayscommon.enums.Currency;
+import com.oyo.paymentgatewayscommon.enums.Gateway;
+import com.oyo.paymentgatewayscommon.enums.OrderType;
 import com.oyo.paymentgatewayscommon.enums.PaymentMode;
 import com.oyo.paymentgatewayscommon.enums.StatusCode;
+import com.oyo.paymentgatewayscommon.enums.TransactionStatus;
 import com.oyo.paymentgatewayscommon.request.AmountRequest;
 import com.oyo.paymentgatewayscommon.request.InitiatePaymentRequest;
 import com.oyo.paymentgatewayscommon.response.InitiatePaymentResponse;
@@ -25,6 +33,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
@@ -35,14 +45,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 
+@Service
 public class PaymentManager {
 
 
     @Autowired
     private OrderRepositry orderRepositry;
 
-    @Autowired
-    RestTemplate restTemplate;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -53,25 +62,26 @@ public class PaymentManager {
     @Autowired
     private Gson gson;
 
-    @Autowired
     @Value("${PAYMENTS_BASE_URL}")
     private String baseUrl;
 
 
     @Autowired
-    @Value("${PAYMENTS_INITIATE_TRANSACTIONL}")
+    @Value("${PAYMENTS_INITIATE_TRANSACTION}")
     private String path;
 
 
-    public InvoiceResponse getInvoice(String bookingId)
+
+    public WrapperResponse<?> getInvoice(String bookingId)
     {
         List<OrderEntity> orderEntityList = orderRepositry.findAllByBookingId(bookingId);
         if(orderEntityList.size() == 0){
-
+            return WrapperResponse.<InitiatePaymentResponse>builder().statusMessage("No order found with given order id").
+                    statusCode(String.valueOf(HttpStatus.BAD_REQUEST)).build();
         }
         InvoiceResponse invoiceResponse = new InvoiceResponse();
-        Double totalAmount = null;
-        Double amountRemaining = null;
+        Double totalAmount = 0.0;
+        Double amountRemaining = 0.0;
         invoiceResponse.setBookingId(bookingId);
         invoiceResponse.setOrders(orderEntityList);
         for (OrderEntity order:invoiceResponse.getOrders()) {
@@ -83,37 +93,47 @@ public class PaymentManager {
         }
         invoiceResponse.setRemainingAmount(amountRemaining);
         invoiceResponse.setTotalAmount(totalAmount);
-        return invoiceResponse;
+        return WrapperResponse.<InvoiceResponse>builder().data(invoiceResponse).build();
     }
 
-    public WrapperResponse<?> partialPayment(String orderId) throws Exception {
-        OrderEntity orderEntity = orderRepositry.findByOrderId(orderId);
-        if(Objects.isNull(orderEntity)){
+    public WrapperResponse<?> partialPayment(OrderIdsRequest orderIds) throws Exception {
+        List<OrderEntity> orderEntityList = orderRepositry.findByOrderIds(orderIds.getOrders());
+        if(orderEntityList.size() == 0){
             return WrapperResponse.<InitiatePaymentResponse>builder().statusMessage("No order found with given order id").
                     statusCode(String.valueOf(HttpStatus.BAD_REQUEST)).build();
         }
-        List<OrderEntity> orderEntityList = new ArrayList<>();
-        orderEntityList.add(orderEntity);
-        return initiatePayment(orderEntityList);
+        return initiatePayment(orderEntityList, orderEntityList.get(0).getBookingId());
 
 
     }
 
-    private WrapperResponse<?> initiatePayment(List<OrderEntity> orderEntity) {
+    private WrapperResponse<?> initiatePayment(List<OrderEntity> orderEntityList, String bookingId) {
         InitiatePaymentResponse initiatePaymentResponse = null;
-        InitiatePaymentReq initiatePaymentRequest = getInitiatePaymentRequest(orderEntity);
+        RestTemplate restTemplate = new RestTemplate();
+        InitiatePaymentReq initiatePaymentRequest = getInitiatePaymentRequest(orderEntityList);
+        if(Objects.isNull(initiatePaymentRequest)){
+            InvoiceResponse invoiceResponse = getInvoice(bookingId)
+           return WrapperResponse.<InvoiceResponse>builder().statusMessage("Orders Already Charged").
+                    statusCode(String.valueOf(HttpStatus.ALREADY_REPORTED)).data(invoiceResponse).build();
+        }
         String requestString = gson.toJson(initiatePaymentRequest);
-        JSONObject body = gson.fromJson(requestString, JSONObject.class);
-        HttpEntity<JSONObject> requestEntity = new HttpEntity<>(body, new HttpHeaders());
+        JSONObject body = objectMapper.convertValue(requestString, JSONObject.class);
+        HttpEntity<InitiatePaymentReq> requestEntity = new HttpEntity<>(initiatePaymentRequest, new HttpHeaders());
+        MappingJackson2HttpMessageConverter jsonHttpMessageConverter = new MappingJackson2HttpMessageConverter();
+        jsonHttpMessageConverter.getObjectMapper().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        restTemplate.getMessageConverters().add(jsonHttpMessageConverter);
         ResponseEntity<String> paymentResponse = restTemplate.exchange(baseUrl+path, HttpMethod.POST,requestEntity,String.class);
+        PaymentDataResponse paymentDataResponse = new PaymentDataResponse();
         if(paymentResponse.getStatusCode().equals(HttpStatus.OK)){
-            orderEntity.stream().forEach(orders -> orderManagerImp.modifyOrder(orders.getOrderId(), Boolean.TRUE));
-            try {
-                initiatePaymentResponse = objectMapper.readValue(paymentResponse.getBody(), InitiatePaymentResponse.class);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return WrapperResponse.<InitiatePaymentResponse>builder().data(initiatePaymentResponse).build();
+
+            orderEntityList.stream().forEach(orders -> orderManagerImp.modifyOrder(orders.getOrderId(), Boolean.TRUE));
+//            try {
+                paymentDataResponse = gson.fromJson(paymentResponse.getBody(), PaymentDataResponse.class);
+//                        objectMapper.readValue(paymentResponse.getBody(), PaymentDataResponse.class);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+            return WrapperResponse.<InitiatePaymentRes>builder().data(paymentDataResponse.getData()).build();
         }
 
         return WrapperResponse.<InitiatePaymentResponse>builder().statusMessage("Payment Failed").
@@ -125,27 +145,29 @@ public class PaymentManager {
         Currency currency = order.getCurrency();
         String merchantTxnId = orderEntity.size()== 1?order.getOrderId():order.getBookingId();
         String userProfileId = order.getUserProfileId();
-        Double totalAmount = orderEntity.stream().collect(Collectors.summingDouble(OrderEntity::getTotalAmount));
-
+        Double totalAmount = orderEntity.stream().filter(o -> o.getIsPaid().equals(Boolean.FALSE)).collect(Collectors.summingDouble(OrderEntity::getTotalAmount));
+        if(totalAmount == 0){
+            return null;
+        }
         InitiatePaymentReq initiatePaymentReq = InitiatePaymentReq.builder().amount(totalAmount).
-                aggregator(Aggregator.DEFAULT).
+                aggregator(Aggregator.DEFAULT).gateway(Gateway.PAYU).
                 channelId(UUID.fromString("211f2406-d211-4f6b-b8b3-4532248ee4b0")).
-                countryCode("IN").collectCards(Boolean.TRUE).currency(currency).
+                countryCode("IN").collectCards(Boolean.FALSE).currency(currency).orderCurrency(currency).
                 orderId(merchantTxnId).merchantId(UUID.fromString("2738f2b4-a35d-4c33-a26a-e4d9583778a5")).
-                orderAmount(totalAmount).paymentMode(PaymentMode.CC).
-                merchantTxnId(merchantTxnId).userProfileId(userProfileId)
+                orderAmount(totalAmount).orderType(OrderType.BOOKING).amount(totalAmount).paymentMode(PaymentMode.CC).
+                merchantTxnId(String.valueOf(UUID.randomUUID())).userProfileId(userProfileId)
                 .build();
         return initiatePaymentReq;
     }
 
-    public WrapperResponse<?> fullPayment(String bookingId) throws IOException {
+    public WrapperResponse<?> fullPayment(String bookingId)  {
 
         List<OrderEntity> orderEntityList = orderRepositry.findAllByBookingId(bookingId);
         if(orderEntityList.size() == 0){
             return WrapperResponse.<InitiatePaymentResponse>builder().statusMessage("No order found with given booking id").
                     statusCode(String.valueOf(HttpStatus.BAD_REQUEST)).build();
         }
-        return initiatePayment(orderEntityList);
+        return initiatePayment(orderEntityList, bookingId);
     }
 
 }

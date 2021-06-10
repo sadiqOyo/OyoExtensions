@@ -52,7 +52,7 @@ public class OrderEntity {
 
     private Double totalAmount;
 
-
+    @Column(nullable = false)
     private Currency currency;
 
     @Column(nullable = true)

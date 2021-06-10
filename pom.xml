@@ -49,9 +49,7 @@
 		<version.payment.gateways>0.1.33</version.payment.gateways>
 		<version.payment.wrappers>0.1.34</version.payment.wrappers>
 		<version.adyen.core>2.7.3</version.adyen.core>
-		<version.jedis>2.9.0</version.jedis>
-		<version.redis.wrapper>0.0.3</version.redis.wrapper>
-	</properties>
+
 	<dependencies>
 		<!-- https://mvnrepository.com/artifact/org.zalando/logbook-spring-boot-starter -->
 		<dependency>
@@ -252,11 +250,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-cache</artifactId>
 			<version>${version.spring.boot}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.oyo</groupId>
-			<artifactId>payments-redis-wrapper</artifactId>
-			<version>${version.redis.wrapper}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
@@ -472,26 +465,9 @@
 			<version>${version.payment.gateways}</version>
 		</dependency>
 		<dependency>
-			<groupId>redis.clients</groupId>
-			<artifactId>jedis</artifactId>
-			<version>${version.jedis}</version>
-
-		</dependency>
-		<dependency>
 			<groupId>org.axonframework</groupId>
 			<artifactId>axon-spring-boot-starter</artifactId>
 			<version>3.4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-redis</artifactId>
-			<version>${version.spring.boot}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>io.lettuce</groupId>
-					<artifactId>lettuce-core</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 	</dependencies>
 
