@@ -1,5 +1,7 @@
 package com.oyo.oyoExt.Manager;
 
+import com.amazonaws.util.CollectionUtils;
+import com.amazonaws.util.StringUtils;
 import com.google.gson.Gson;
 import com.oyo.oyoExt.Entities.OrderEntity;
 import com.oyo.oyoExt.Request.OrderRequest;
@@ -40,6 +42,9 @@ public class OrderManagerImp implements OrderManager{
         orderEntity.setCreatedAt(Date.from(Instant.now()));
         orderEntity.setUpdatedAt(Date.from(Instant.now()));
         orderEntity.setUserProfileId(orderRequest.getUserProfileId());
+        orderEntity.setName(orderRequest.getName());
+        orderEntity.setPhone(orderRequest.getPhone());
+        orderEntity.setEmail(orderRequest.getEmail());
         orderRepositry.save(orderEntity);
         return WrapperResponse.<Boolean>builder().data(Boolean.TRUE).build();
     }
@@ -68,19 +73,47 @@ public class OrderManagerImp implements OrderManager{
     }
 
     @Override
-    public WrapperResponse<?> modifyOrder(String orderId, Boolean isPaid, String trxnId)  {
+    public WrapperResponse<?> modifyOrder(String orderId, Boolean isPaid)  {
 
         OrderEntity existingOrder = orderRepositry.findByOrderId(orderId);
         if(Objects.isNull(existingOrder))
             return WrapperResponse.<OrderEntity>builder().
                     statusCode(String.valueOf(StatusCode.BAD_REQUEST)).statusMessage("no data found").build();
         existingOrder.setIsPaid(isPaid);
-        existingOrder.setTrxn_id(trxnId);
         orderRepositry.save(existingOrder);
         return WrapperResponse.<OrderEntity>builder().data(existingOrder).build();
     }
 
+    public WrapperResponse<?> modifyOrder(String orderId, Boolean isPaid, String txnId)  {
+
+        List<OrderEntity> existingOrderList = orderRepositry.findAllByTrxnId(txnId);
+
+         ;
+        if(CollectionUtils.isNullOrEmpty(existingOrderList))
+            return WrapperResponse.<OrderEntity>builder().
+                    statusCode(String.valueOf(StatusCode.BAD_REQUEST)).statusMessage("no data found").build();
+        for(OrderEntity orderEntity : existingOrderList){
+            orderEntity.setTrxnId(txnId);
+            orderEntity.setIsPaid(isPaid);
+            orderRepositry.save(orderEntity);
+        }
+        return WrapperResponse.<List<OrderEntity>>builder().data(existingOrderList).build();
+    }
 
 
+    public WrapperResponse<?> modifyOrder(String orderId, Boolean isPaid, String txnId, Boolean a)  {
+
+
+        OrderEntity existingOrder = orderRepositry.findByOrderId(orderId);
+
+        if(Objects.isNull(existingOrder))
+            return WrapperResponse.<OrderEntity>builder().
+                    statusCode(String.valueOf(StatusCode.BAD_REQUEST)).statusMessage("no data found").build();
+
+        existingOrder.setTrxnId(txnId);
+        existingOrder.setIsPaid(isPaid);
+        orderRepositry.save(existingOrder);
+        return WrapperResponse.<OrderEntity>builder().data(existingOrder).build();
+    }
 
 }

@@ -68,7 +68,11 @@ public class OrderEntity {
     private Date updatedAt;
 
     @Column(nullable = true)
-    private String trxn_id;
+    private String trxnId;
+
+    private String name;
+    private String phone;
+    private String email;
 
 
 

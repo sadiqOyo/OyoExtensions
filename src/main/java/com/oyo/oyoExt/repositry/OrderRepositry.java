@@ -22,4 +22,8 @@ public interface OrderRepositry extends JpaRepository<OrderEntity, Long> {
 
     @Query(value = "SELECT * FROM orders o WHERE o.order_id IN (:ids)", nativeQuery = true)
     List<OrderEntity> findByOrderIds(@Param("ids")List<String> orderIds);
+
+    List<OrderEntity> findAllByTrxnId(String txnId);
+
+    List<OrderEntity> findAllByOrderId(String orderId);
 }

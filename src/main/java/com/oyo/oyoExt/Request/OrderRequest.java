@@ -27,6 +27,9 @@ public class OrderRequest{
     private Boolean isPaid;
     private String category;
     private Currency currency;
+    private String name;
+    private String email;
+    private String phone;
 
 
 }

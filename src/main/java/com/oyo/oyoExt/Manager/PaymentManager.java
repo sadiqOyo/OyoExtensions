@@ -132,7 +132,7 @@ public class PaymentManager {
         PaymentDataResponse paymentDataResponse = new PaymentDataResponse();
         if(paymentResponse.getStatusCode().equals(HttpStatus.OK)){
 
-//            orderEntityList.stream().forEach(orders -> orderManagerImp.modifyOrder(orders.getOrderId(), Boolean.TRUE, initiatePaymentRequest.getMerchantTxnId()));
+            orderEntityList.stream().forEach(orders -> orderManagerImp.modifyOrder(orders.getOrderId(), Boolean.FALSE, initiatePaymentRequest.getMerchantTxnId(), Boolean.TRUE));
 //            try {
                 paymentDataResponse = gson.fromJson(paymentResponse.getBody(), PaymentDataResponse.class);
 //                        objectMapper.readValue(paymentResponse.getBody(), PaymentDataResponse.class);
@@ -158,7 +158,8 @@ public class PaymentManager {
         InitiatePaymentReq initiatePaymentReq = InitiatePaymentReq.builder().amount(totalAmount).
                 aggregator(Aggregator.DEFAULT).gateway(Gateway.PAYU).
                 channelId(UUID.fromString("211f2406-d211-4f6b-b8b3-4532248ee4b0")).
-                countryCode("IN").collectCards(Boolean.FALSE).currency(currency).orderCurrency(currency).
+                countryCode("IN").collectCards(Boolean.FALSE).currency(currency).orderCurrency(currency).userName(order.getName()).
+                phone(order.getPhone()).email(order.getEmail()).
                 orderId(merchantTxnId).merchantId(UUID.fromString("2738f2b4-a35d-4c33-a26a-e4d9583778a5")).
                 orderAmount(totalAmount).orderType(OrderType.BOOKING).amount(totalAmount).paymentMode(PaymentMode.CC).
                 merchantTxnId(String.valueOf(UUID.randomUUID())).userProfileId(userProfileId)
@@ -182,10 +183,10 @@ public class PaymentManager {
             return WrapperResponse.<InitiatePaymentResponse>builder().statusMessage("No order found with given booking id").
                     statusCode(String.valueOf(HttpStatus.BAD_REQUEST)).build();
         }
-        orderEntityList = orderEntityList.stream().filter(distinctByKey(OrderEntity::getTrxn_id)).collect(Collectors.toList());
+        orderEntityList = orderEntityList.stream().filter(distinctByKey(OrderEntity::getTrxnId)).collect(Collectors.toList());
         RestTemplate restTemplate = new RestTemplate();
         for(OrderEntity order : orderEntityList){
-            VerifyPaymentReq verifyPaymentReq = VerifyPaymentReq.builder().merchantTxnId(order.getTrxn_id()).build();
+            VerifyPaymentReq verifyPaymentReq = VerifyPaymentReq.builder().merchantTxnId(order.getTrxnId()).build();
             HttpEntity<VerifyPaymentReq> verifyEntity = new HttpEntity<>(verifyPaymentReq);
             ResponseEntity<String> response = restTemplate.exchange(baseUrl+"/transaction/verify",
                     HttpMethod.PUT,verifyEntity,String.class);
