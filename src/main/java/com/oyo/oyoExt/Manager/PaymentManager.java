@@ -159,7 +159,7 @@ public class PaymentManager {
                 aggregator(Aggregator.DEFAULT).gateway(Gateway.PAYU).
                 channelId(UUID.fromString("211f2406-d211-4f6b-b8b3-4532248ee4b0")).
                 countryCode("IN").collectCards(Boolean.FALSE).currency(currency).orderCurrency(currency).userName(order.getName()).
-                phone(order.getPhone()).email(order.getEmail()).
+                phone(order.getPhone()).email(order.getEmail()).successUrl("http://localhost:5000").
                 orderId(merchantTxnId).merchantId(UUID.fromString("2738f2b4-a35d-4c33-a26a-e4d9583778a5")).
                 orderAmount(totalAmount).orderType(OrderType.BOOKING).amount(totalAmount).paymentMode(PaymentMode.CC).
                 merchantTxnId(String.valueOf(UUID.randomUUID())).userProfileId(userProfileId)
