@@ -68,13 +68,14 @@ public class OrderManagerImp implements OrderManager{
     }
 
     @Override
-    public WrapperResponse<?> modifyOrder(String orderId, Boolean isPaid)  {
+    public WrapperResponse<?> modifyOrder(String orderId, Boolean isPaid, String trxnId)  {
 
         OrderEntity existingOrder = orderRepositry.findByOrderId(orderId);
         if(Objects.isNull(existingOrder))
             return WrapperResponse.<OrderEntity>builder().
                     statusCode(String.valueOf(StatusCode.BAD_REQUEST)).statusMessage("no data found").build();
         existingOrder.setIsPaid(isPaid);
+        existingOrder.setTrxn_id(trxnId);
         orderRepositry.save(existingOrder);
         return WrapperResponse.<OrderEntity>builder().data(existingOrder).build();
     }

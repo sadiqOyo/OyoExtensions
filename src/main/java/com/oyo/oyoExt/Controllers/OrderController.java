@@ -49,7 +49,7 @@ public class OrderController {
     public WrapperResponse<?> modifyOrder(@RequestParam(value = "order_id", required = true) String orderId,
             @RequestParam(value = "is_paid", required = true) Boolean isPaid) {
 
-        return orderManagerImp.modifyOrder(orderId, isPaid);
+        return orderManagerImp.modifyOrder(orderId, isPaid, StringUtils.EMPTY);
     }
 
 }

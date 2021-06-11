@@ -49,7 +49,7 @@
 		<version.payment.gateways>0.1.33</version.payment.gateways>
 		<version.payment.wrappers>0.1.34</version.payment.wrappers>
 		<version.adyen.core>2.7.3</version.adyen.core>
-
+	</properties>
 	<dependencies>
 		<!-- https://mvnrepository.com/artifact/org.zalando/logbook-spring-boot-starter -->
 		<dependency>

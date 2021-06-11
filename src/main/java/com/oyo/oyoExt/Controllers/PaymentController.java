@@ -43,4 +43,10 @@ public class PaymentController {
         return paymentManager.getInvoice(bookingId);
     }
 
+    @GetMapping("/verify")
+    public WrapperResponse<?> verifyPayment(
+            @RequestParam (value = "booking_id") String bookingId) {
+        return paymentManager.verifyPayment(bookingId);
+    }
+
 }

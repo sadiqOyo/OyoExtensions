@@ -67,6 +67,9 @@ public class OrderEntity {
     @Column(nullable = true)
     private Date updatedAt;
 
+    @Column(nullable = true)
+    private String trxn_id;
+
 
 
 
