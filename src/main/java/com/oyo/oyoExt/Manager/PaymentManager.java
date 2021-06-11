@@ -112,7 +112,7 @@ public class PaymentManager {
     private WrapperResponse<?> initiatePayment(List<OrderEntity> orderEntityList, String bookingId) {
         InitiatePaymentResponse initiatePaymentResponse = null;
         RestTemplate restTemplate = new RestTemplate();
-        InitiatePaymentReq initiatePaymentRequest = getInitiatePaymentRequest(orderEntityList);
+        InitiatePaymentReq initiatePaymentRequest = getInitiatePaymentRequest(orderEntityList, bookingId);
         if(Objects.isNull(initiatePaymentRequest)){
             WrapperResponse<?> invoiceResponse = getInvoice(bookingId);
 
@@ -146,7 +146,7 @@ public class PaymentManager {
                 statusCode(String.valueOf(HttpStatus.BAD_REQUEST)).build();
     }
 
-    private InitiatePaymentReq getInitiatePaymentRequest(List<OrderEntity> orderEntity) {
+    private InitiatePaymentReq getInitiatePaymentRequest(List<OrderEntity> orderEntity, String bookingId) {
         OrderEntity order = orderEntity.get(0);
         Currency currency = order.getCurrency();
         String merchantTxnId = orderEntity.size()== 1?order.getOrderId():order.getBookingId();
@@ -159,7 +159,7 @@ public class PaymentManager {
                 aggregator(Aggregator.DEFAULT).gateway(Gateway.PAYU).
                 channelId(UUID.fromString("211f2406-d211-4f6b-b8b3-4532248ee4b0")).
                 countryCode("IN").collectCards(Boolean.FALSE).currency(currency).orderCurrency(currency).userName(order.getName()).
-                phone(order.getPhone()).email(order.getEmail()).successUrl("http://localhost:5000").
+                phone(order.getPhone()).email(order.getEmail()).successUrl("http://127.0.0.1:5000/pay-success/" + bookingId).
                 orderId(merchantTxnId).merchantId(UUID.fromString("2738f2b4-a35d-4c33-a26a-e4d9583778a5")).
                 orderAmount(totalAmount).orderType(OrderType.BOOKING).amount(totalAmount).paymentMode(PaymentMode.CC).
                 merchantTxnId(String.valueOf(UUID.randomUUID())).userProfileId(userProfileId)
@@ -194,7 +194,7 @@ public class PaymentManager {
             if(response.getStatusCode().equals(HttpStatus.OK)){
                 verifyDataResponse = gson.fromJson(response.getBody(), VerifyDataResponse.class);
                 if(verifyDataResponse.getData().getStatus().equals(TransactionStatus.PENDING)){
-                    orderManagerImp.modifyOrder(order.getOrderId(), Boolean.FALSE, verifyPaymentReq.getMerchantTxnId());
+                    orderManagerImp.modifyOrder(order.getOrderId(), Boolean.TRUE, verifyPaymentReq.getMerchantTxnId());
                 }else if(verifyDataResponse.getData().getStatus().equals(TransactionStatus.SUCCESS)){
                     orderManagerImp.modifyOrder(order.getOrderId(), Boolean.TRUE, verifyPaymentReq.getMerchantTxnId());
                 }
